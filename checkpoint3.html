@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JAHAAZ - Checkpoint 3: Logic & Coding</title>
+  <style>
+    :root {
+      --bg-dark: #030f1e;
+      --card-bg: rgba(7, 26, 49, 0.88);
+      --accent-cyan: #00f2fe;
+      --accent-blue: #4facfe;
+      --text-light: #e0f7fa;
+      --correct-green: #00e676;
+      --wrong-red: #ff5252;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at center, #072142 0%, #030f1e 100%);
+      color: var(--text-light);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, rgba(0, 242, 254, 0.05) 0%, transparent 80%);
+      pointer-events: none;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 650px;
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 242, 254, 0.25);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 242, 254, 0.15);
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+      border-bottom: 1px solid rgba(0, 242, 254, 0.2);
+      padding-bottom: 15px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      letter-spacing: 4px;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+      margin-bottom: 5px;
+    }
+
+    .checkpoint-tag {
+      font-size: 1rem;
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 600;
+    }
+
+    .timer-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(0, 242, 254, 0.15);
+    }
+
+    .timer-label { font-size: 0.9rem; opacity: 0.85; letter-spacing: 1px; }
+    .timer-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--accent-cyan);
+      font-family: monospace;
+    }
+
+    .question-box {
+      margin-bottom: 25px;
+    }
+
+    .question-text {
+      font-size: 1.15rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 242, 254, 0.2);
+      color: var(--text-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      text-align: left;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .option-btn:hover {
+      background: rgba(0, 242, 254, 0.15);
+      border-color: var(--accent-cyan);
+    }
+
+    .input-box {
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      background: rgba(0, 0, 0, 0.4);
+      color: #fff;
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      outline: none;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+      border: none;
+      border-radius: 8px;
+      color: #030f1e;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    .submit-btn:hover { opacity: 0.9; }
+
+    .status-msg {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+      display: none;
+    }
+
+    .status-msg.correct {
+      background: rgba(0, 230, 118, 0.15);
+      border: 1px solid var(--correct-green);
+      color: var(--correct-green);
+    }
+
+    .status-msg.wrong {
+      background: rgba(255, 82, 82, 0.15);
+      border: 1px solid var(--wrong-red);
+      color: var(--wrong-red);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>JAHAAZ</h1>
+      <div class="checkpoint-tag">Checkpoint 3: Logic & Coding</div>
+    </header>
+
+    <div class="timer-box">
+      <span class="timer-label">TIME ELAPSED</span>
+      <span id="timer" class="timer-value">00:00</span>
+    </div>
+
+    <div id="questionContainer" class="question-box"></div>
+
+    <div id="statusMsg" class="status-msg"></div>
+  </div>
+
+  <script>
+    
+const QUESTION_BANK = {
+  physics: [
+    { type: 'mcq', question: "Situation: You connect two unequal resistors (R1>R2) in series across a battery. Which resistor experiences the greater voltage drop?", options: ["A) The smaller resistor (R2)", "B) The larger resistor (R1)", "C) Both experience the exact same voltage drop", "D) Neither, the voltage drops to zero"], answer: "B" },
+    { type: 'mcq', question: "Situation: A hawk drops a feather and a heavy iron bolt simultaneously inside a vacuum chamber. Why do they hit the bottom at the exact same time?", options: ["A) Gravity acts more strongly on the feather in a vacuum.", "B) Air resistance is absent, and gravitational acceleration is independent of mass.", "C) The magnetic field of the chamber pulls them equally.", "D) The feather's mass increases as it falls."], answer: "B" },
+    { type: 'mcq', question: "Situation: You snap a bar magnet cleanly into two pieces. Instead of getting a separate North pole and South pole, what do you observe at the break points?", options: ["A) Both broken ends become demagnetized completely.", "B) New opposite poles immediately form, creating two complete, independent magnets.", "C) The two pieces repel each other violently.", "D) The magnetic strength quadruples."], answer: "B" },
+    { type: 'mcq', question: "Situation: You want to insert an ammeter into a live circuit to measure current. What must the internal resistance of an ideal ammeter be to avoid disrupting the circuit?", options: ["A) Infinite resistance", "B) Zero resistance", "C) Equal to the load resistance", "D) Negative resistance"], answer: "B" },
+    { type: 'mcq', question: "Situation: A squirrel rolls a nut down a frictionless curved ramp. As the nut descends from the top, what happens to its total mechanical energy?", options: ["A) It increases constantly.", "B) It decreases due to friction.", "C) It remains perfectly constant.", "D) It converts entirely into magnetic energy."], answer: "C" },
+    { type: 'mcq', question: "Situation: Two identical lamps are wired in parallel across a battery. If one lamp burns out and opens its branch, what happens to the voltage across the surviving lamp?", options: ["A) It drops to zero.", "B) It halves.", "C) It stays exactly the same.", "D) It doubles."], answer: "C" },
+    { type: 'mcq', question: "Situation: A raccoon tries to shield a sensitive compass from a stray bar magnet by placing a material around it. Which material is best for magnetic shielding?", options: ["A) A thick sheet of copper", "B) A soft iron shell", "C) A wooden box", "D) A glass pane"], answer: "B" },
+    { type: 'mcq', question: "Situation: If you travel to a planet where both the mass and radius are exactly double those of Earth, how does your surface weight change compared to Earth?", options: ["A) It quadruples.", "B) It doubles.", "C) It stays the same.", "D) It is halved."], answer: "D" },
+    { type: 'mcq', question: "Situation: You modify a heating circuit by cutting the resistance of the heating element in half while keeping the voltage source constant. What happens to the power dissipated?", options: ["A) It halves.", "B) It stays the same.", "C) It doubles.", "D) It quadruples."], answer: "C" },
+    { type: 'mcq', question: "Situation: You drop a stone from a high cliff. Ignoring air resistance, the distance it falls in the first second compared to the second second follows what ratio?", options: ["A) 1:1", "B) 1:3", "C) 1:4", "D) 1:2"], answer: "B" },
+    { type: 'num', question: "How many total magnetic poles are created when you snap 1 bar magnet cleanly into two pieces?", answer: "4" }
+  ],
+  maths: [
+    { type: 'mcq', question: "The ship is entering a violent storm, and the captain orders the crew to secure the primary anchor. On the deck, there are 3 distinct heavy iron rings bolted down and the sailors have 5 distinct colored ropes. Every rope must be used and tied to exactly one iron ring, and no iron ring can be left empty. How many ways can this be done?", options: ["A) 60", "B) 90", "C) 150", "D) 240"], answer: "C" },
+    { type: 'mcq', question: "If 100 times the 100th term of an AP is equal to 50 times its 50th term, then the 150th term of this AP is:", options: ["A) -150", "B) 150 times its 50th term", "C) 0", "D) 150"], answer: "C" },
+    { type: 'mcq', question: "Dolphin's Jump: A dolphin's jump curve is h(t) = 4t - t^2. When does it reach its maximum height?", options: ["A) 1 s", "B) 2 s", "C) 3 s", "D) 4 s"], answer: "B" },
+    { type: 'mcq', question: "Ocean Waves have the equation 2x + 1. Find the area of 100 such waves from 1 to 2.", options: ["A) 200", "B) 300", "C) 400", "D) 500"], answer: "C" },
+    { type: 'mcq', question: "A submarine's position is represented by 2x + y = 7 and x - y = 2. What is its position (x, y)?", options: ["A) (2, 3)", "B) (3, 1)", "C) (1, 3)", "D) (4, -1)"], answer: "B" },
+    { type: 'mcq', question: "In a group of 40 ocean explorers, 24 are sailors, 19 are divers, and 8 are both sailors and divers. How many are sailors only?", options: ["A) 8", "B) 11", "C) 16", "D) 24"], answer: "C" },
+    { type: 'mcq', question: "How many distinct arrangements of the letters in LEVEL are possible?", options: ["A) 20", "B) 30", "C) 60", "D) 120"], answer: "B" },
+    { type: 'num', question: "How many sides does a dodecagon have?", answer: "12" },
+    { type: 'num', question: "A circular observatory has the equation x^2 + y^2 - 6x + 4y - 12 = 0. What is its radius?", answer: "5" }
+  ],
+  logicCoding: [
+    { type: 'mcq', question: "A mermaid says, 'I have no siblings, and the mother of the person in this photograph is my mother's daughter.' Who is in the photograph?", options: ["A) Her mother", "B) Her daughter", "C) Her grandmother", "D) Her aunt"], answer: "B" },
+    { type: 'mcq', question: "A crab arranges shells in this sequence: 1, 4, 9, 16, 25, __. What comes next?", options: ["A) 30", "B) 35", "C) 36", "D) 49"], answer: "C" },
+    { type: 'mcq', question: "A pufferfish thinks of a number. It doubles the number and adds 6 to get 20. What was the original number?", options: ["A) 5", "B) 7", "C) 8", "D) 13"], answer: "B" },
+    { type: 'mcq', question: "A shark discovers this sequence carved into a sunken ship: 2, 6, 12, 20, 30, __. What number comes next?", options: ["A) 36", "B) 40", "C) 42", "D) 48"], answer: "C" },
+    { type: 'mcq', question: "Which built-in function in Python do you use to print 'Hello Elf!' to the console?", options: ["A) echo()", "B) print()", "C) display()", "D) cout <<"], answer: "B" },
+    { type: 'mcq', question: "What is the mandatory function name required for a C++ program to start executing?", options: ["A) start()", "B) begin()", "C) main()", "D) execute()"], answer: "C" },
+    { type: 'mcq', question: "A dragon wants to add a new gold coin to its Python list named hoard. Which method should it call?", options: ["A) hoard.push(coin)", "B) hoard.append(coin)", "C) hoard.add(coin)", "D) hoard.insert_end(coin)"], answer: "B" },
+    { type: 'num', question: "Using A = 1, B = 2, C = 3, and so on, what is the total numerical value of SEA?", answer: "25" },
+    { type: 'num', question: "Nine identical-looking pearls are on a table. One is heavier than the others. What is the minimum number of weighings needed on a balance scale to guarantee finding the heavier pearl?", answer: "2" }
+  ],
+  sportsGK: [
+    { type: 'mcq', question: "Which legendary Indian batter is widely nicknamed the God of Cricket?", options: ["A) Sunil Gavaskar", "B) Sachin Tendulkar", "C) Virat Kohli", "D) Rahul Dravid"], answer: "B" },
+    { type: 'mcq', question: "Who was the captain of the Indian team when they won the inaugural ICC T20 World Cup in 2007?", options: ["A) Sourav Ganguly", "B) Rahul Dravid", "C) MS Dhoni", "D) Anil Kumble"], answer: "C" },
+    { type: 'mcq', question: "In which year did India win its first-ever ODI Cricket World Cup under the captaincy of Kapil Dev?", options: ["A) 1975", "B) 1979", "C) 1983", "D) 1987"], answer: "C" },
+    { type: 'mcq', question: "Which metal is liquid at ordinary room temperature?", options: ["A) Mercury", "B) Lead", "C) Sodium", "D) Potassium"], answer: "A" },
+    { type: 'mcq', question: "What is the largest planet in our Solar System?", options: ["A) Earth", "B) Mars", "C) Jupiter", "D) Saturn"], answer: "C" },
+    { type: 'num', question: "How many bones does a typical adult human have?", answer: "206" },
+    { type: 'num', question: "How many total FIFA World Cup titles has Brazil won in men's football history?", answer: "5" }
+  ],
+  chemistry: [
+    { type: 'mcq', question: "A mermaid is developing a potion to survive in the ocean. Which of the following is a colligative property?", options: ["A) Viscosity", "B) Surface tension", "C) Osmotic pressure", "D) Refractive index"], answer: "C" },
+    { type: 'mcq', question: "A crab discovers a locked chest with [Co(NH3)6]Cl3. The lock opens when the correct oxidation state of cobalt is entered. What is it?", options: ["A) +1", "B) +2", "C) +3", "D) +6"], answer: "C" },
+    { type: 'mcq', question: "Which reagent should the dolphin detective use to distinguish between an aldehyde and a ketone?", options: ["A) Tollens' reagent", "B) NaCl solution", "C) Dilute HCl", "D) NaOH solution"], answer: "A" },
+    { type: 'mcq', question: "An octopus accidentally knocks four bottles off a shelf. Which liquid is the strongest acid in aqueous solution?", options: ["A) CH3COOH", "B) C2H5OH", "C) H2O", "D) HCl"], answer: "D" },
+    { type: 'num', question: "A pufferfish releases a strong acid with an H+ concentration of 1 x 10^-3 mol L^-1. What is its pH?", answer: "3" },
+    { type: 'num', question: "An atom has 11 protons, 12 neutrons, and 10 electrons. What is its mass number?", answer: "23" }
+  ]
+};
+
+
+    const ALLOWED_SUBJECTS = ['logicCoding'];
+    let currentQuestion = null;
+    let timerSeconds = 0;
+    let timerInterval = null;
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerSeconds = 0;
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        timerSeconds++;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const mins = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+      const secs = String(timerSeconds % 60).padStart(2, '0');
+      document.getElementById('timer').innerText = mins + ":" + secs;
+    }
+
+    function loadRandomQuestion() {
+      const chosenSubject = ALLOWED_SUBJECTS[Math.floor(Math.random() * ALLOWED_SUBJECTS.length)];
+      
+      let usedIndices = JSON.parse(localStorage.getItem('jahaaz_used_' + chosenSubject)) || [];
+      const totalQuestions = QUESTION_BANK[chosenSubject].length;
+
+      if (usedIndices.length >= totalQuestions) {
+        usedIndices = [];
+      }
+
+      let availableIndices = [];
+      for (let i = 0; i < totalQuestions; i++) {
+        if (!usedIndices.includes(i)) availableIndices.push(i);
+      }
+
+      const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+      usedIndices.push(randomIndex);
+      localStorage.setItem('jahaaz_used_' + chosenSubject, JSON.stringify(usedIndices));
+
+      currentQuestion = QUESTION_BANK[chosenSubject][randomIndex];
+      renderQuestion(currentQuestion);
+    }
+
+    function renderQuestion(q) {
+      const container = document.getElementById('questionContainer');
+      document.getElementById('statusMsg').style.display = 'none';
+
+      let html = '<div class="question-text">' + q.question + '</div>';
+
+      if (q.type === 'mcq') {
+        html += '<div class="options-grid">';
+        q.options.forEach((opt) => {
+          const optVal = opt.trim().charAt(0);
+          html += '<button class="option-btn" onclick="checkAnswer(\'' + optVal + '\')">' + opt + '</button>';
+        });
+        html += '</div>';
+      } else if (q.type === 'num') {
+        html += '<input type="number" id="numInput" class="input-box" placeholder="Type numerical answer..." />' +
+                '<button class="submit-btn" onclick="submitNumerical()">Submit Answer</button>';
+      }
+
+      container.innerHTML = html;
+    }
+
+    function checkAnswer(userAns) {
+      const statusMsg = document.getElementById('statusMsg');
+      if (userAns.trim().toUpperCase() === currentQuestion.answer.trim().toUpperCase()) {
+        clearInterval(timerInterval);
+        statusMsg.className = "status-msg correct";
+        statusMsg.innerText = "Congratulations! RACE AHEAD";
+        statusMsg.style.display = 'block';
+      } else {
+        timerSeconds += 5;
+        updateTimerDisplay();
+
+        statusMsg.className = "status-msg wrong";
+        statusMsg.innerText = "Wrong Answer! Try another one";
+        statusMsg.style.display = 'block';
+
+        setTimeout(() => {
+          loadRandomQuestion();
+        }, 1500);
+      }
+    }
+
+    function submitNumerical() {
+      const val = document.getElementById('numInput').value;
+      if (val !== "") {
+        checkAnswer(val);
+      }
+    }
+
+    window.onload = () => {
+      startTimer();
+      loadRandomQuestion();
+    };
+  </script>
+</body>
+</html>
